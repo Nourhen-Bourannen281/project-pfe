@@ -1,0 +1,113 @@
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #0d1b2a; /* bleu marine très sombre */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-container {
+  background: linear-gradient(145deg, rgba(13, 27, 42, 0.9), rgba(27, 38, 59, 0.9));
+  padding: 2.5rem;
+  border-radius: 20px;
+  width: 360px;
+  text-align: center;
+  border: 1px solid rgba(0, 150, 255, 0.4);
+  box-shadow: 0 0 25px rgba(0, 150, 255, 0.3);
+  animation: slideUp 1s ease forwards;
+  opacity: 0;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(50px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+.login-header {
+  margin-bottom: 1.5rem;
+}
+
+.login-icon {
+  font-size: 50px;
+  color: #00aaff;
+  margin-bottom: 0.5rem;
+}
+
+.login-header h2 {
+  color: #e0e0e0;
+  letter-spacing: 2px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(0, 150, 255, 0.5);
+  border-radius: 10px;
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.05);
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+
+.input-group:hover {
+  box-shadow: 0 0 12px rgba(0, 150, 255, 0.6);
+  transform: scale(1.02);
+}
+
+.input-icon {
+  margin-right: 0.5rem;
+  color: #00aaff;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 14px;
+  background: transparent;
+  color: #fff;
+}
+
+.input-group input::placeholder {
+  color: rgba(200, 200, 200, 0.7);
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.2rem;
+  font-size: 13px;
+  color: #ccc;
+}
+
+.forgot-link {
+  color: #00aaff;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.forgot-link:hover {
+  color: #fff;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  background: #00aaff;
+  color: #0d1b2a;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.4s, transform 0.3s, color 0.3s;
+}
+
+.login-btn:hover {
+  background: #0077cc;
+  color: #fff;
+  transform: translateY(-2px);
+}
