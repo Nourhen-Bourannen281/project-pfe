@@ -1,9 +1,12 @@
 // Routes pour l'authentification
 const express = require('express');
 const router = express.Router();
-const { login, getMe } = require('../controllers/authController');
+const { register, login, getMe } = require('../controllers/authController');
 const { protect } = require('../middlewares/auth');
 
+
+// Route publique : inscription
+ router.post("/register", register);
 // Route publique : connexion
 router.post('/login', login);
 

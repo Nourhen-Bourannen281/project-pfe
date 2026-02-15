@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --background: #1a1a2e;
+  --color: #ffffff;
+  --primary-color: #0f3460;
+}
+
+.update-root {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--background) 0%, #16213e 100%);
+  font-family: "Poppins", sans-serif;
+  color: var(--color);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Cercles décoratifs */
+.update-root::before {
+  content: '';
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle at 30% 30%, var(--primary-color), transparent);
+  border-radius: 50%;
+  top: -100px;
+  right: -100px;
+  opacity: 0.3;
+}
+
+.update-root::after {
+  content: '';
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle at 70% 70%, rgba(255,255,255,0.1), transparent);
+  border-radius: 50%;
+  bottom: -100px;
+  left: -100px;
+  opacity: 0.4;
+}
+
+/* Conteneur du formulaire */
+.update-container {
+  position: relative;
+  z-index: 2;
+  width: 400px;
+  padding: 2rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.update-container h2 {
+  text-align: center;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(45deg, var(--color), rgba(255,255,255,0.7));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Inputs */
+.update-container form input {
+  display: block;
+  width: 100%;
+  padding: 14px 20px;
+  margin: 1rem 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--color);
+  font-size: 15px;
+  font-weight: 500;
+  backdrop-filter: blur(15px);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.update-container form input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.update-container form input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(15, 52, 96, 0.3);
+}
+
+/* Bouton */
+.update-container form button {
+  width: 100%;
+  padding: 15px;
+  margin-top: 1rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(45deg, var(--primary-color), #16213e);
+  color: var(--color);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(15, 52, 96, 0.4);
+}
+
+.update-container form button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(15, 52, 96, 0.6);
+}

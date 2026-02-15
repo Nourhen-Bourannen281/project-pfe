@@ -1,0 +1,44 @@
+.back-button-wrapper {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  z-index: 10;
+}
+
+.back-button-wrapper:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.back-button-wrapper svg {
+  width: 16px;
+  height: 15px;
+  fill: rgba(255, 255, 255, 0.9);
+}
+
+/* Pour les écrans plus petits */
+@media (max-width: 768px) {
+  .back-button-wrapper {
+    top: 1rem;
+    left: 1rem;
+    width: 36px;
+    height: 36px;
+  }
+
+  .back-button-wrapper svg {
+    width: 14px;
+    height: 13px;
+  }
+}

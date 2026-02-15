@@ -1,25 +1,33 @@
+// StockManagerDashboard.jsx
 import React, { useEffect, useState } from "react";
-import { View, Text, Button, FlatList, StyleSheet, Alert } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { BarCodeScanner } from "expo-barcode-scanner";
-import QRCode from "react-native-qrcode-svg";
+import "../styles/StockManagerDashboard.css";
 
-export default function StockManagerDashboard({ navigation }) {
+function StockManagerDashboard() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [scannedProduct, setScannedProduct] = useState(null);
-  const [hasPermission, setHasPermission] = useState(null);
-  const [scannerActive, setScannerActive] = useState(true);
+  const [unauthorized, setUnauthorized] = useState(false);
+  const navigate = useNavigate();
 
-  // Charger tous les produits
+  const user = JSON.parse(localStorage.getItem("user"));
+
   useEffect(() => {
+    if (!user || user.role !== "responsable_stock") {
+      setUnauthorized(true);
+      setLoading(false);
+      return;
+    }
+
     const fetchProducts = async () => {
       try {
-        const token = await AsyncStorage.getItem("token");
-        const res = await axios.get("http://192.168.1.114:5000/api/products", {
+        const token = localStorage.getItem("token");
+        const res = await axios.get("http://localhost:5000/api/products", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        console.log("Produits reçus:", res.data);
+
         setProducts(res.data.data || []);
       } catch (err) {
         console.error("Erreur chargement produits", err);
@@ -27,137 +35,104 @@ export default function StockManagerDashboard({ navigation }) {
         setLoading(false);
       }
     };
+
     fetchProducts();
-  }, []);
+  }, [user]);
 
-  // Demander permission caméra
-  useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === "granted");
-    })();
-  }, []);
+  if (loading) return <p className="loading-text">Chargement...</p>;
+  if (unauthorized) return <Navigate to="/unauthorized" />;
 
-  // Scan → récupérer produit
-  const handleScan = async ({ data }) => {
-    setScannerActive(false);
-    try {
-      const token = await AsyncStorage.getItem("token");
-      const res = await axios.get(`http://192.168.1.114:5000/api/products/${data}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.data.success) {
-        setScannedProduct(res.data.data);
-      }
-    } catch (err) {
-      console.error("Erreur récupération produit", err);
-    }
-  };
-
-  // Ajouter quantité
-  const addQuantity = async (productId) => {
-    const product = products.find((p) => p._id === productId);
-    if (!product) return;
-    const newQuantity = product.quantity + 1;
-
-    try {
-      const token = await AsyncStorage.getItem("token");
-      const res = await axios.put(
-        `http://192.168.1.114:5000/api/products/${productId}`,
-        { quantity: newQuantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data.success) {
-        setProducts(products.map((p) => (p._id === productId ? { ...p, quantity: newQuantity } : p)));
-        setScannedProduct({ ...scannedProduct, quantity: newQuantity });
-      }
-    } catch (err) {
-      console.error("Erreur ajout quantité", err);
-    }
-  };
-
-  // Retirer quantité
-  const removeQuantity = async (productId) => {
-    const product = products.find((p) => p._id === productId);
-    if (!product || product.quantity <= 0) {
-      Alert.alert("Stock déjà à zéro");
+  const handleUpdateProfile = () => {
+    if (!user || !user.id) {
+      alert("Utilisateur non connecté ou ID manquant");
       return;
     }
-    const newQuantity = product.quantity - 1;
+    navigate(`/update-user/${user.id}`);
+  };
 
+  const handleDeleteProduct = async (id) => {
+    if (!id) {
+      alert("ID produit manquant !");
+      return;
+    }
     try {
-      const token = await AsyncStorage.getItem("token");
-      const res = await axios.put(
-        `http://192.168.1.114:5000/api/products/${productId}`,
-        { quantity: newQuantity },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      if (res.data.success) {
-        setProducts(products.map((p) => (p._id === productId ? { ...p, quantity: newQuantity } : p)));
-        setScannedProduct({ ...scannedProduct, quantity: newQuantity });
-      }
+      const token = localStorage.getItem("token");
+      await axios.delete(`http://localhost:5000/api/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setProducts(products.filter((p) => p.id !== id));
+      alert("Produit supprimé !");
     } catch (err) {
-      console.error("Erreur retrait quantité", err);
+      console.error("Erreur suppression produit", err);
     }
   };
 
-  // Déconnexion
-  const logout = async () => {
-    await AsyncStorage.clear();
-    navigation.replace("Login");
+  const handleEditProduct = (id) => {
+    if (!id) {
+      alert("ID produit manquant !");
+      return;
+    }
+    navigate(`/update-product/${id}`);
   };
 
-  if (loading) return <Text>Chargement...</Text>;
-  if (hasPermission === null) return <Text>Demande de permission caméra...</Text>;
-  if (hasPermission === false) return <Text>Permission caméra refusée</Text>;
-
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>📦 Gestion des Stocks</Text>
+    <div className="dashboard-root">
+      <div className="dashboard-container">
+        <h1>📦 Gestion des Stocks 📦</h1>
 
-      {scannerActive && (
-        <BarCodeScanner
-          onBarCodeScanned={handleScan}
-          style={{ width: 300, height: 300 }}
-        />
-      )}
-      <Button
-        title={scannerActive ? "⏸️ Pause Scanner" : "▶️ Activer Scanner"}
-        onPress={() => setScannerActive(!scannerActive)}
-      />
+        <div className="dashboard-actions">
+          <button onClick={() => navigate("/add-product")}>➕ Ajouter un produit</button>
+          <button onClick={handleUpdateProfile}>👤 Modifier mon profil</button>
+          <button
+            onClick={() => {
+              localStorage.clear();
+              window.location.href = "/";
+            }}
+          >
+            🚪 Déconnexion
+          </button>
+        </div>
 
-      {scannedProduct && (
-        <View style={styles.card}>
-          <Text style={styles.productName}>{scannedProduct.name}</Text>
-          <Text>Prix: {scannedProduct.price} €</Text>
-          <Text>Stock actuel: {scannedProduct.quantity}</Text>
-          <Button title="➕ Ajouter" onPress={() => addQuantity(scannedProduct._id)} />
-          <Button title="➖ Retirer" onPress={() => removeQuantity(scannedProduct._id)} />
-        </View>
-      )}
-
-      <Text style={styles.subtitle}>📋 Inventaire</Text>
-      <FlatList
-        data={products}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <View style={styles.listItem}>
-            <Text>{item.name} - {item.price} € - Stock: {item.quantity}</Text>
-            <QRCode value={item._id} size={50} />
-          </View>
-        )}
-      />
-
-      <Button title="🚪 Déconnexion" onPress={logout} />
-    </View>
+        <h2>Liste des produits</h2>
+        <table className="product-table">
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Description</th>
+              <th>Quantité</th>
+              <th>Prix</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Array.isArray(products) &&
+              products.map((p) => (
+                <tr key={p.id}>
+                  <td>{p.name}</td>
+                  <td>{p.description}</td>
+                  <td>{p.quantity}</td>
+                  <td>{p.price} DT</td>
+                  <td className="actions-cell">
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEditProduct(p.id)}
+                    >
+                      ✏️ Modifier
+                    </button>
+                    <button
+                      className="del-btn"
+                      onClick={() => handleDeleteProduct(p.id)}
+                    >
+                      🗑 Supprimer
+                    </button>
+                  </td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  title: { fontSize: 24, fontWeight: "bold", marginBottom: 20 },
-  subtitle: { fontSize: 18, marginTop: 20 },
-  card: { padding: 15, borderWidth: 1, marginVertical: 10 },
-  productName: { fontSize: 20, fontWeight: "bold" },
-  listItem: { padding: 10, borderBottomWidth: 1 },
-});
+export default StockManagerDashboard;

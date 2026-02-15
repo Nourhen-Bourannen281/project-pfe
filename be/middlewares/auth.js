@@ -1,38 +1,38 @@
-// Middleware pour vérifier l'authentification avec JWT
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+// middlewares/auth.js
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
+// Vérifie le token et attache l'utilisateur à req.user
 const protect = async (req, res, next) => {
   let token;
 
-  // Vérifier si le token est dans le header
-  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+  if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     try {
-      // Extraire le token du header
-      token = req.headers.authorization.split(' ')[1];
-      
-      // Vérifier le token
+      token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      // Récupérer l'utilisateur sans le password
-      req.user = await User.findById(decoded.id).select('-password');
-      
-      next(); // Passer au prochain middleware
-    } catch (error) {
-      console.error('Erreur d\'authentification:', error);
-      res.status(401).json({ 
-        success: false, 
-        message: 'Non autorisé, token invalide' 
-      });
-    }
-  }
+      req.user = await User.findById(decoded.id).select("-password");
 
-  if (!token) {
-    res.status(401).json({ 
-      success: false, 
-      message: 'Non autorisé, pas de token' 
-    });
+      if (!req.user) {
+        return res.status(401).json({ message: "Utilisateur non trouvé" });
+      }
+
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Token invalide" });
+    }
+  } else {
+    return res.status(401).json({ message: "Pas de token" });
   }
 };
 
-module.exports = { protect };
+// Vérifie si le rôle de l'utilisateur est autorisé
+const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Accès refusé : rôle non autorisé" });
+    }
+    next();
+  };
+};
+
+module.exports = { protect, authorize };

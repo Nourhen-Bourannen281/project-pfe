@@ -113,15 +113,15 @@ exports.updateProduct = async (req, res, next) => {
 };
 
 // DELETE product
-exports.deleteProduct = async (req, res, next) => {
+exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
-    if (!product)
-      return res.status(404).json({ success: false, message: 'Produit non trouvé' });
-
-    await product.deleteOne();
-    res.status(200).json({ success: true, message: 'Produit supprimé avec succès' });
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: "Produit introuvable" });
+    }
+    res.json({ success: true, message: "Produit supprimé avec succès" });
   } catch (error) {
-    next(error);
+    res.status(500).json({ message: "Erreur serveur", error: error.message });
   }
 };
+

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -9,7 +10,7 @@ const userSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'L\'email est obligatoire'],
+    required: [true, "L'email est obligatoire"],
     unique: true,
     lowercase: true,
     trim: true
@@ -17,7 +18,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Le mot de passe est obligatoire'],
-    minlength: [6, 'Le mot de passe doit contenir au moins 6 caractères'],
+    minlength: [6, 'Minimum 6 caractères'],
     select: false
   },
   role: {
@@ -25,25 +26,37 @@ const userSchema = new mongoose.Schema({
     enum: ['ingénieur', 'commercial', 'responsable_stock', 'directeur'],
     default: 'ingénieur'
   },
-  isActive: {
-    type: Boolean,
-    default: true
-  },
+  passwordResetToken: String,
+  passwordResetExpire: Date,
   createdAt: {
     type: Date,
     default: Date.now
   }
 });
 
-// 🔐 Hasher le mot de passe avant save
+// Hash password
 userSchema.pre('save', async function () {
-  if (!this.isModified('password')) return; // si non modifié, on ne fait rien
+  if (!this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
 
-// Méthode pour vérifier le mot de passe
-userSchema.methods.comparePassword = async function(candidatePassword) {
+// Compare password
+userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Generate reset token
+userSchema.methods.getResetPasswordToken = function () {
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  this.passwordResetExpire = Date.now() + 10 * 60 * 1000;
+
+  return resetToken;
 };
 
 module.exports = mongoose.model('User', userSchema);
