@@ -1,8 +1,6 @@
-// middlewares/auth.js
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// Vérifie le token et attache l'utilisateur à req.user
 const protect = async (req, res, next) => {
   let token;
 
@@ -10,29 +8,26 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(" ")[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select("-password");
 
-      if (!req.user) {
+      const user = await User.findById(decoded.id).select("-password");
+      if (!user) {
         return res.status(401).json({ message: "Utilisateur non trouvé" });
       }
+
+      req.user = {
+        id: user._id.toString(),
+        role: user.role,
+        email: user.email,
+        name: user.name
+      };
 
       next();
     } catch (error) {
       return res.status(401).json({ message: "Token invalide" });
     }
   } else {
-    return res.status(401).json({ message: "Pas de token" });
+    return res.status(401).json({ message: "Pas de token d'authentification" });
   }
 };
 
-// Vérifie si le rôle de l'utilisateur est autorisé
-const authorize = (...roles) => {
-  return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
-      return res.status(403).json({ message: "Accès refusé : rôle non autorisé" });
-    }
-    next();
-  };
-};
-
-module.exports = { protect, authorize };
+module.exports = { protect };

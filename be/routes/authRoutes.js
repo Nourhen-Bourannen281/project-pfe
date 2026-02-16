@@ -1,16 +1,12 @@
-// Routes pour l'authentification
 const express = require('express');
 const router = express.Router();
-const { register, login, getMe } = require('../controllers/authController');
+const { register, login, getMe, forgotPassword, resetPassword } = require('../controllers/authController');
 const { protect } = require('../middlewares/auth');
 
-
-// Route publique : inscription
- router.post("/register", register);
-// Route publique : connexion
+router.post("/register", register);
 router.post('/login', login);
-
-// Route privée : récupérer l'utilisateur connecté
 router.get('/me', protect, getMe);
+router.post('/forgot-password', forgotPassword);
+router.put('/reset-password/:token', resetPassword);
 
 module.exports = router;

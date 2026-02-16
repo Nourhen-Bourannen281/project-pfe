@@ -11,6 +11,7 @@ import RegisterPage from "./pages/Register"
 import DeletePage from "./pages/DeleteUser"
 import AddProduct from "./pages/AddProduct"
 import UpdateProduct from "./pages/UpdateProduct";
+import ProductsList from "./pages/Products";
 // Composant pour protéger les routes selon le rôle
 const ProtectedRoute = ({ user, allowedRoles, children }) => {
   if (!user?.role) {
@@ -81,6 +82,7 @@ function App() {
 
         <Route path="/Add-product" element={<AddProduct />} />
               <Route path="/update-product/:id" element={<UpdateProduct />} />
+              <Route path="/products" element={<ProductsList />} />
       </Routes>
     </Router>
   );
